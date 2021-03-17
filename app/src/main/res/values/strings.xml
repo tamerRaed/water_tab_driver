@@ -13,4 +13,10 @@
     <string name="username">Username</string>
     <string name="have_account">Have an account?</string>
     <string name="back">back</string>
+    <string name="password_empty">Password must be entered!</string>
+    <string name="email_empty">Email must be entered!</string>
+    <string name="phone">Phone</string>
+    <string name="username_empty">Username must be entered</string>
+    <string name="phone_empty">Phone must be entered</string>
+    <string name="email_is_used">This email already used!</string>
 </resources>
