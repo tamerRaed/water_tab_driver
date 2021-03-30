@@ -19,4 +19,16 @@
     <string name="username_empty">Username must be entered</string>
     <string name="phone_empty">Phone must be entered</string>
     <string name="email_is_used">This email already used!</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="Ride">Ride</string>
+    <string name="notification">Notifications</string>
+    <string name="about_us">About us</string>
+    <string name="concat_us">Concat us</string>
+    <string name="rating">Rating</string>
+    <string name="lock">lock</string>
+    <string name="my_status">My Status</string>
+    <string name="offline">Ofline</string>
+    <string name="online">Online</string>
 </resources>

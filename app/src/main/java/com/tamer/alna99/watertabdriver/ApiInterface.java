@@ -8,11 +8,13 @@ import retrofit2.http.POST;
 
 public interface ApiInterface {
 
-    String LOGIN_PATH = "api/users/login";
-    String REGISTER_PATH = "api/users/register";
+    String LOGIN_PATH = "/api/users/logInDriver";
+    String REGISTER_PATH = "api/users/registerDriver";
     String PARAM_EMAIL = "email";
     String PARAM_PASSWORD = "password";
     String PARAM_NAME = "name";
+    String PARAM_LONG = "long";
+    String PARAM_LAT = "lat";
 
     @FormUrlEncoded
     @POST(LOGIN_PATH)
@@ -20,6 +22,10 @@ public interface ApiInterface {
 
     @FormUrlEncoded
     @POST(REGISTER_PATH)
-    Call<ResponseBody> register(@Field(PARAM_NAME) String name, @Field(PARAM_EMAIL) String email, @Field(PARAM_PASSWORD) String password);
+    Call<ResponseBody> register(@Field(PARAM_NAME) String name,
+                                @Field(PARAM_EMAIL) String email,
+                                @Field(PARAM_LONG) String longitude,
+                                @Field(PARAM_LAT) String latitude,
+                                @Field(PARAM_PASSWORD) String password);
 
 }
