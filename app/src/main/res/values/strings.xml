@@ -39,4 +39,6 @@
     <string name="send_email">Send Email</string>
     <string name="content_error">Content must entered!</string>
     <string name="subject_error">Subject must entered!</string>
+    <string name="old_orders">Old Orders</string>
+    <string name="logout">Logout</string>
 </resources>

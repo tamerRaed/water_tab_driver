@@ -19,6 +19,7 @@ import com.tamer.alna99.watertabdriver.fragments.ConcatUsFragment;
 import com.tamer.alna99.watertabdriver.fragments.DashboardFragment;
 import com.tamer.alna99.watertabdriver.fragments.MapFragment;
 import com.tamer.alna99.watertabdriver.fragments.NotificationFragment;
+import com.tamer.alna99.watertabdriver.fragments.OldOrdersFragment;
 
 import java.util.Objects;
 
@@ -100,6 +101,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toolbar.setTitle(getString(R.string.notification));
                 toolbar.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 drawerLayout.closeDrawers();
+                break;
+
+            case R.id.old_orders:
+                OldOrdersFragment oldOrdersFragment = new OldOrdersFragment();
+                moveFragment(oldOrdersFragment);
+                toolbar.setTitle(getString(R.string.old_orders));
+                toolbar.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                drawerLayout.closeDrawers();
+                break;
+
+            case R.id.logout:
+                onBackPressed();
                 break;
         }
         return false;
