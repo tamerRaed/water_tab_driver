@@ -121,6 +121,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Get Location
                 checkSettingsAndRequestLocationUpdates();
+                createLocationRequest();
+                createLocationCallback();
             } else {
                 Toast.makeText(getContext(), "location permission is required", Toast.LENGTH_SHORT).show();
             }
