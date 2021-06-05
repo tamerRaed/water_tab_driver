@@ -13,6 +13,7 @@ public interface ApiInterface {
     String PARAM_EMAIL = "email";
     String PARAM_PASSWORD = "password";
     String PARAM_NAME = "name";
+    String PARAM_PHONE = "phone";
     String PARAM_LONG = "long";
     String PARAM_LAT = "lat";
 
@@ -26,6 +27,7 @@ public interface ApiInterface {
                                 @Field(PARAM_EMAIL) String email,
                                 @Field(PARAM_LONG) String longitude,
                                 @Field(PARAM_LAT) String latitude,
-                                @Field(PARAM_PASSWORD) String password);
+                                @Field(PARAM_PASSWORD) String password,
+                                @Field(PARAM_PHONE) String phone);
 
 }

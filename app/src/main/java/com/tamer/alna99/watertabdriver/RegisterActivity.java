@@ -8,7 +8,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -26,8 +25,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.JsonObject;
@@ -128,7 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (checkFields()) {
             checkSettingsAndRequestLocation();
 
-            Call<ResponseBody> responseBodyCall = networkUtils.getApiInterface().register(username, email, longitude, latitude, password);
+            Call<ResponseBody> responseBodyCall = networkUtils.getApiInterface().register(username, email, longitude, latitude, password, phone);
             responseBodyCall.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
@@ -191,10 +188,9 @@ public class RegisterActivity extends AppCompatActivity {
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 Location location = locationResult.getLastLocation();
-                Log.d("ddddd", location.toString());
                 longitude = String.valueOf(location.getLongitude());
                 latitude = String.valueOf(location.getLatitude());
-
+                removeLocationUpdates();
             }
         };
     }
@@ -223,32 +219,26 @@ public class RegisterActivity extends AppCompatActivity {
             Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(locationSettingsRequest);
 
             // Success
-            task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-                @Override
-                public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                    // request location updates
-                    requestLocation();
-                }
+            task.addOnSuccessListener(locationSettingsResponse -> {
+                // request location updates
+                requestLocation();
             });
 
             // Failure
-            task.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof ResolvableApiException) {
-                        // if resolvable, ask the user  to enable location settings
-                        ResolvableApiException resolvableApiException = (ResolvableApiException) e;
-                        try {
-                            resolvableApiException.startResolutionForResult(RegisterActivity.this, REQUEST_LOCATION_SETTINGS);
-                        } catch (IntentSender.SendIntentException sendIntentException) {
-                            sendIntentException.printStackTrace();
-                            // Location is not available in this device
-                            Toast.makeText(RegisterActivity.this, "Location Service unavailable", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
+            task.addOnFailureListener(e -> {
+                if (e instanceof ResolvableApiException) {
+                    // if resolvable, ask the user  to enable location settings
+                    ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                    try {
+                        resolvableApiException.startResolutionForResult(RegisterActivity.this, REQUEST_LOCATION_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendIntentException) {
+                        sendIntentException.printStackTrace();
                         // Location is not available in this device
                         Toast.makeText(RegisterActivity.this, "Location Service unavailable", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    // Location is not available in this device
+                    Toast.makeText(RegisterActivity.this, "Location Service unavailable", Toast.LENGTH_SHORT).show();
                 }
             });
         }

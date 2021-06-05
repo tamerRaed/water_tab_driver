@@ -37,6 +37,7 @@
                 android:layout_marginTop="@dimen/_4sdp"
                 android:max="5"
                 android:numStars="5"
+                android:isIndicator="true"
                 android:progressTint="@color/yellow"
                 android:rating="3" />
         </LinearLayout>
