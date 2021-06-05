@@ -7,7 +7,7 @@ import retrofit2.Retrofit;
 public class NetworkUtils {
 
     private static NetworkUtils instance;
-    private final String BASE_URL = "https://miahy.herokuapp.com/";
+    public static final String BASE_URL = "https://miahy.herokuapp.com/";
     private final ApiInterface apiInterface;
 
     private NetworkUtils() {

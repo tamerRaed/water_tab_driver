@@ -36,7 +36,13 @@ import com.google.android.libraries.maps.SupportMapFragment;
 import com.google.android.libraries.maps.model.CameraPosition;
 import com.google.android.libraries.maps.model.LatLng;
 import com.google.android.libraries.maps.model.MarkerOptions;
+import com.tamer.alna99.watertabdriver.MySocket;
 import com.tamer.alna99.watertabdriver.R;
+
+import org.json.JSONObject;
+
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private final int REQUEST_LOCATION_PERMISSION = 100;
@@ -46,6 +52,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LocationCallback locationCallback;
     private Location location;
     private SupportMapFragment supportMapFragment;
+    private final Emitter.Listener newOrderListener = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            Log.d("ddd", data.toString());
+        }
+    };
+    private Socket socket;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,7 +75,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
+        socket = MySocket.getInstance();
+        socket.connect();
+        socket.on("newOrder", newOrderListener);
+
+
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        socket.off("newOrder", newOrderListener);
+        socket.disconnect();
     }
 
     @Override
