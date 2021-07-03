@@ -1,4 +1,4 @@
-package com.tamer.alna99.watertabdriver;
+package com.tamer.alna99.watertabdriver.view.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.navigation.NavigationView;
-import com.tamer.alna99.watertabdriver.fragments.AboutUsFragment;
-import com.tamer.alna99.watertabdriver.fragments.ConcatUsFragment;
-import com.tamer.alna99.watertabdriver.fragments.DashboardFragment;
-import com.tamer.alna99.watertabdriver.fragments.MapFragment;
-import com.tamer.alna99.watertabdriver.fragments.NotificationFragment;
-import com.tamer.alna99.watertabdriver.fragments.OldOrdersFragment;
+import com.tamer.alna99.watertabdriver.R;
+import com.tamer.alna99.watertabdriver.view.fragments.AboutUsFragment;
+import com.tamer.alna99.watertabdriver.view.fragments.ConcatUsFragment;
+import com.tamer.alna99.watertabdriver.view.fragments.MapFragment;
+import com.tamer.alna99.watertabdriver.view.fragments.MyProfileFragment;
+import com.tamer.alna99.watertabdriver.view.fragments.OldOrdersFragment;
 
 import java.util.Objects;
 
@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-        DashboardFragment dashboardFragment = new DashboardFragment();
-        moveFragment(dashboardFragment);
-        toolbar.setTitle(getString(R.string.homepage));
+        MapFragment mapFragment = new MapFragment();
+        moveFragment(mapFragment);
+        toolbar.setTitle(getString(R.string.Ride));
     }
 
 
@@ -64,10 +64,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.homepage:
-                DashboardFragment dashboardFragment = new DashboardFragment();
-                moveFragment(dashboardFragment);
-                toolbar.setTitle(getString(R.string.homepage));
+            case R.id.my_profile:
+                MyProfileFragment myProfileFragment = new MyProfileFragment();
+                moveFragment(myProfileFragment);
+                toolbar.setTitle(getString(R.string.my_profile));
                 toolbar.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 drawerLayout.closeDrawers();
                 break;
@@ -92,13 +92,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ConcatUsFragment concatUsFragment = new ConcatUsFragment();
                 moveFragment(concatUsFragment);
                 toolbar.setTitle(getString(R.string.concat_us));
-                toolbar.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.notification:
-                NotificationFragment notificationFragment = new NotificationFragment();
-                moveFragment(notificationFragment);
-                toolbar.setTitle(getString(R.string.notification));
                 toolbar.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 drawerLayout.closeDrawers();
                 break;

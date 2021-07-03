@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/_12sdp"
-    tools:context=".fragments.ConcatUsFragment">
+    tools:context=".view.fragments.ConcatUsFragment">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/concat_us_input_layout_email_subject"

@@ -41,4 +41,10 @@
     <string name="subject_error">Subject must entered!</string>
     <string name="old_orders">Old Orders</string>
     <string name="logout">Logout</string>
+    <string name="my_profile">My Profile</string>
+    <string name="new_order">There is an order, Accept it?</string>
+    <string name="rejection_order">Rejection</string>
+    <string name="accept_order">Accept</string>
+    <string name="error">Something is wrong try again later.</string>
+
 </resources>

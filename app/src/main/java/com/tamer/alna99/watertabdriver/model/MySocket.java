@@ -1,4 +1,4 @@
-package com.tamer.alna99.watertabdriver;
+package com.tamer.alna99.watertabdriver.model;
 
 import java.net.URISyntaxException;
 

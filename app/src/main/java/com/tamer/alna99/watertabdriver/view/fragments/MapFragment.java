@@ -1,4 +1,4 @@
-package com.tamer.alna99.watertabdriver.fragments;
+package com.tamer.alna99.watertabdriver.view.fragments;
 
 import android.Manifest;
 import android.app.Activity;
@@ -12,10 +12,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.Group;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -36,9 +38,14 @@ import com.google.android.libraries.maps.SupportMapFragment;
 import com.google.android.libraries.maps.model.CameraPosition;
 import com.google.android.libraries.maps.model.LatLng;
 import com.google.android.libraries.maps.model.MarkerOptions;
-import com.tamer.alna99.watertabdriver.MySocket;
 import com.tamer.alna99.watertabdriver.R;
+import com.tamer.alna99.watertabdriver.model.AnswerInterface;
+import com.tamer.alna99.watertabdriver.model.MySocket;
+import com.tamer.alna99.watertabdriver.model.Result;
+import com.tamer.alna99.watertabdriver.model.SharedPrefs;
+import com.tamer.alna99.watertabdriver.viewmodel.MapViewModel;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.socket.client.Socket;
@@ -52,20 +59,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LocationCallback locationCallback;
     private Location location;
     private SupportMapFragment supportMapFragment;
-    private final Emitter.Listener newOrderListener = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            Log.d("ddd", data.toString());
-        }
+    private final Emitter.Listener newOrderListener = args -> {
+        Log.d("dddd", "Listener on");
+        JSONObject data = (JSONObject) args[0];
+        Log.d("ddd", data.toString());
+
+        BottomSheetFragment sheetFragment = new BottomSheetFragment(new AnswerInterface() {
+            @Override
+            public void answer(int answer) {
+                JSONObject data2 = new JSONObject();
+                try {
+                    data2.put("answer", answer);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                socket.emit("driverAnswer", data2);
+
+                JSONObject data3 = new JSONObject();
+                try {
+                    data3.put("orderFinish", "finish");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                socket.emit("orderFinish", data3);
+            }
+        });
+        sheetFragment.show(getChildFragmentManager(), "Tag");
     };
+    private ProgressBar progressBar;
+    private Group group;
+    private String id;
+    private MapViewModel mapViewModel;
     private Socket socket;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+        id = SharedPrefs.getUserId(requireContext());
+        mapViewModel = new MapViewModel();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
         checkSettingsAndRequestLocationUpdates();
         createLocationRequest();
@@ -73,12 +107,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        progressBar = view.findViewById(R.id.progressBar);
+        group = view.findViewById(R.id.group);
         supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         socket = MySocket.getInstance();
         socket.connect();
-        socket.on("newOrder", newOrderListener);
 
+        JSONObject data = new JSONObject();
+        try {
+            data.put("id", id);
+            data.put("isDriver", "true");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        socket.emit("join", data);
+
+        socket.on("newOrder", newOrderListener);
 
         return view;
     }
@@ -131,13 +177,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void checkSettingsAndRequestLocationUpdates() {
         // Check permission
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
         } else {
             // Create location settings request
             LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder()
                     .addLocationRequest(locationRequest).build();
-            SettingsClient settingsClient = LocationServices.getSettingsClient(getContext());
+            SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
             Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(locationSettingsRequest);
 
             // Success
@@ -152,7 +198,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     // if resolvable, ask the user  to enable location settings
                     ResolvableApiException resolvableApiException = (ResolvableApiException) e;
                     try {
-                        resolvableApiException.startResolutionForResult(getActivity(), REQUEST_LOCATION_SETTINGS);
+                        resolvableApiException.startResolutionForResult(requireActivity(), REQUEST_LOCATION_SETTINGS);
                     } catch (IntentSender.SendIntentException sendIntentException) {
                         sendIntentException.printStackTrace();
                         // Location is not available in this device
@@ -167,12 +213,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void requestLocationUpdates() {
-
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
         } else {
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-
         }
     }
 
@@ -184,18 +228,63 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void createLocationCallback() {
+//        mapViewModel.updateResult().addObserver((observable, o) -> {
+//            Result result = (Result) o;
+//            switch (result.status){
+//                case SUCCESS:
+//                    Location location = (Location) result.data;
+//                    supportMapFragment.getMapAsync(MapFragment.this);
+//                    removeLocationUpdates();
+//                    progressBar.setVisibility(View.GONE);
+//                    group.setVisibility(View.VISIBLE);
+//                    double [] locations = {location.getLongitude(), location.getLatitude()};
+//
+//                    mapViewModel.updateResult().addObserver((observable2, o2) -> {
+//                        Result result2 = (Result) o2;
+//                        switch (result2.status){
+//                            case SUCCESS:
+//                                Log.d("dddd", String.valueOf(result2.data));
+//                                break;
+//                            case ERROR:
+//                                Log.d("dddd", getString(R.string.error));
+//                                break;
+//                        }
+//                    });
+//
+//                    mapViewModel.updateLocation(id, locations);
+//                    break;
+//                case ERROR:
+//                    Log.d("dddd", getString(R.string.error));
+//                    break;
+//            }
+//        });
+//
+//        mapViewModel.requestLocation(locationCallback);
+
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 location = locationResult.getLastLocation();
-                if (location != null) {
-                    Log.d("dddd", "Longitude: " + location.getLongitude());
-                    Log.d("dddd", "Latitude: " + location.getLatitude());
-                    removeLocationUpdates();
-                    supportMapFragment.getMapAsync(MapFragment.this);
-                }
+                supportMapFragment.getMapAsync(MapFragment.this);
+                removeLocationUpdates();
+                progressBar.setVisibility(View.GONE);
+                group.setVisibility(View.VISIBLE);
+                double[] locations = {location.getLongitude(), location.getLatitude()};
 
+                mapViewModel.updateResult().addObserver((observable, o) -> {
+                    Result result = (Result) o;
+                    switch (result.status) {
+                        case SUCCESS:
+                            Log.d("dddd", String.valueOf(result.data));
+                            break;
+                        case ERROR:
+                            Log.d("dddd", getString(R.string.error));
+                            break;
+                    }
+                });
+
+                mapViewModel.updateLocation(id, locations);
             }
         };
     }
@@ -203,6 +292,4 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void removeLocationUpdates() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
-
-
 }

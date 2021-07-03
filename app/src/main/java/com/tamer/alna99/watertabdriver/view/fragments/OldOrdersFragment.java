@@ -1,4 +1,4 @@
-package com.tamer.alna99.watertabdriver.fragments;
+package com.tamer.alna99.watertabdriver.view.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
