@@ -1,11 +1,5 @@
 package com.tamer.alna99.watertabdriver.viewmodel;
 
-import android.location.Location;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
 import com.tamer.alna99.watertabdriver.model.DataWrapper;
 import com.tamer.alna99.watertabdriver.model.NetworkUtils;
 import com.tamer.alna99.watertabdriver.model.Result;
@@ -53,19 +47,6 @@ public class MapViewModel {
                 dataWrapper.setData(Result.error("Error"));
             }
         });
-    }
-
-    public void requestLocation(LocationCallback locationCallback) {
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                Location location = locationResult.getLastLocation();
-
-                dataWrapper.setData(Result.success(location));
-
-            }
-        };
     }
 
 }

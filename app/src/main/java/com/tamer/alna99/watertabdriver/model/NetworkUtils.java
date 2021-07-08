@@ -9,8 +9,6 @@ public class NetworkUtils {
     private static NetworkUtils instance;
     public static final String BASE_URL = "https://miahy.herokuapp.com/";
     private final ApiInterface apiInterface;
-    String PARAM_EMAIL = "email";
-    String PARAM_PASSWORD = "password";
 
     private NetworkUtils() {
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
@@ -32,12 +30,5 @@ public class NetworkUtils {
     public ApiInterface getApiInterface() {
         return apiInterface;
     }
-
-//    public HashMap<String, String> getLoginParams(String email, String password){
-//        HashMap<String, String> map = new HashMap<>();
-//        map.put(PARAM_EMAIL, email);
-//        map.put(PARAM_PASSWORD, password);
-//        return map;
-//    }
 
 }

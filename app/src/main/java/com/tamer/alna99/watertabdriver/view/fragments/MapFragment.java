@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -37,7 +39,10 @@ import com.google.android.libraries.maps.OnMapReadyCallback;
 import com.google.android.libraries.maps.SupportMapFragment;
 import com.google.android.libraries.maps.model.CameraPosition;
 import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.libraries.maps.model.Marker;
 import com.google.android.libraries.maps.model.MarkerOptions;
+import com.google.android.libraries.maps.model.Polyline;
+import com.google.android.libraries.maps.model.PolylineOptions;
 import com.tamer.alna99.watertabdriver.R;
 import com.tamer.alna99.watertabdriver.model.AnswerInterface;
 import com.tamer.alna99.watertabdriver.model.MySocket;
@@ -59,14 +64,60 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LocationCallback locationCallback;
     private Location location;
     private SupportMapFragment supportMapFragment;
+    private Button btnFinish;
+    private String lon, lat;
+    private LatLng latLng;
+    private LatLng destination;
+    private Marker marker;
+    private Polyline polyline;
+    private JSONObject data;
+
+    private ProgressBar progressBar;
+    private Group group;
+    private String id;
+    private MapViewModel mapViewModel;
+    private Socket socket;
+    private GoogleMap googleMap;
     private final Emitter.Listener newOrderListener = args -> {
-        Log.d("dddd", "Listener on");
+        Log.d("dddd", "" + args[0]);
         JSONObject data = (JSONObject) args[0];
-        Log.d("ddd", data.toString());
+
+        String clientName = null;
+        try {
+            clientName = data.getString("clientName");
+            lon = data.getString("clientLong");
+            lat = data.getString("clientLat");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String text = getString(R.string.new_order, clientName);
 
         BottomSheetFragment sheetFragment = new BottomSheetFragment(new AnswerInterface() {
             @Override
             public void answer(int answer) {
+                if (answer == 1) {
+                    btnFinish.setVisibility(View.VISIBLE);
+                    destination = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));
+
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(destination);
+                    marker = googleMap.addMarker(markerOptions);
+
+                    polyline = googleMap.addPolyline((new PolylineOptions()).add(destination, latLng).
+                            // below line is use to specify the width of poly line.
+                                    width(5)
+                            // below line is use to add color to our poly line.
+                            .color(Color.RED)
+                            // below line is to make our poly line geodesic.
+                            .geodesic(true));
+
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .zoom(18)
+                            .bearing(30)
+                            .target(destination)
+                            .build();
+                    googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                }
                 JSONObject data2 = new JSONObject();
                 try {
                     data2.put("answer", answer);
@@ -75,25 +126,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
 
                 socket.emit("driverAnswer", data2);
-
-                JSONObject data3 = new JSONObject();
-                try {
-                    data3.put("orderFinish", "finish");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                socket.emit("orderFinish", data3);
             }
-        });
+        }, text);
         sheetFragment.show(getChildFragmentManager(), "Tag");
     };
-    private ProgressBar progressBar;
-    private Group group;
-    private String id;
-    private MapViewModel mapViewModel;
-    private Socket socket;
-
+    private CameraPosition cameraPosition;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -109,12 +146,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = view.findViewById(R.id.progressBar);
         group = view.findViewById(R.id.group);
+        btnFinish = view.findViewById(R.id.btn_finish);
+
+        btnFinish.setOnClickListener(view1 -> {
+            JSONObject data3 = new JSONObject();
+            try {
+                data3.put("orderFinish", "finish");
+                marker.remove();
+                polyline.remove();
+                googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            socket.emit("orderFinish", data3);
+
+            socket.disconnect();
+            socket = MySocket.getInstance();
+            socket.connect();
+            socket.emit("join", data);
+            socket.on("newOrder", newOrderListener);
+
+            btnFinish.setVisibility(View.GONE);
+        });
+
         supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         socket = MySocket.getInstance();
         socket.connect();
 
-        JSONObject data = new JSONObject();
+        data = new JSONObject();
         try {
             data.put("id", id);
             data.put("isDriver", "true");
@@ -139,10 +199,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        this.googleMap = googleMap;
+//        latLng = new LatLng(31.520280, 34.444050);
+
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(latLng);
         googleMap.addMarker(markerOptions);
-        CameraPosition cameraPosition = new CameraPosition.Builder()
+        cameraPosition = new CameraPosition.Builder()
                 .zoom(18)
                 .bearing(30)
                 .target(latLng)
@@ -228,55 +291,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void createLocationCallback() {
-//        mapViewModel.updateResult().addObserver((observable, o) -> {
-//            Result result = (Result) o;
-//            switch (result.status){
-//                case SUCCESS:
-//                    Location location = (Location) result.data;
-//                    supportMapFragment.getMapAsync(MapFragment.this);
-//                    removeLocationUpdates();
-//                    progressBar.setVisibility(View.GONE);
-//                    group.setVisibility(View.VISIBLE);
-//                    double [] locations = {location.getLongitude(), location.getLatitude()};
-//
-//                    mapViewModel.updateResult().addObserver((observable2, o2) -> {
-//                        Result result2 = (Result) o2;
-//                        switch (result2.status){
-//                            case SUCCESS:
-//                                Log.d("dddd", String.valueOf(result2.data));
-//                                break;
-//                            case ERROR:
-//                                Log.d("dddd", getString(R.string.error));
-//                                break;
-//                        }
-//                    });
-//
-//                    mapViewModel.updateLocation(id, locations);
-//                    break;
-//                case ERROR:
-//                    Log.d("dddd", getString(R.string.error));
-//                    break;
-//            }
-//        });
-//
-//        mapViewModel.requestLocation(locationCallback);
-
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 location = locationResult.getLastLocation();
                 supportMapFragment.getMapAsync(MapFragment.this);
-                removeLocationUpdates();
                 progressBar.setVisibility(View.GONE);
                 group.setVisibility(View.VISIBLE);
                 double[] locations = {location.getLongitude(), location.getLatitude()};
+//                double[] locations = {34.444050, 31.520280};
 
                 mapViewModel.updateResult().addObserver((observable, o) -> {
                     Result result = (Result) o;
                     switch (result.status) {
                         case SUCCESS:
-                            Log.d("dddd", String.valueOf(result.data));
+                            Log.d("dddd", "SUCCESS");
                             break;
                         case ERROR:
                             Log.d("dddd", getString(R.string.error));
@@ -285,6 +315,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 });
 
                 mapViewModel.updateLocation(id, locations);
+                removeLocationUpdates();
             }
         };
     }

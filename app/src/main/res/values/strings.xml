@@ -42,9 +42,12 @@
     <string name="old_orders">Old Orders</string>
     <string name="logout">Logout</string>
     <string name="my_profile">My Profile</string>
-    <string name="new_order">There is an order, Accept it?</string>
+    <string name="new_order">%s He asks you for water, Accept it?</string>
     <string name="rejection_order">Rejection</string>
     <string name="accept_order">Accept</string>
     <string name="error">Something is wrong try again later.</string>
+    <string name="finish_order">Finish Order</string>
+    <string name="Welcome">Welcome,</string>
+    <string name="about_us_text">Water Tap was inspired by the need for an online platform to provide services in a faster and more efficient way in comparison with usual ways to provide these services.&lt;br /&gt;Water Tap platform makes it easier for water-trucks drivers and their clients to communicate using modern technologies.</string>
 
 </resources>

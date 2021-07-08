@@ -14,5 +14,6 @@ public class DataWrapper<T> extends Observable {
         this.data = data;
         setChanged();
         notifyObservers(data);
+        deleteObservers();
     }
 }

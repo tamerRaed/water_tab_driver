@@ -3,6 +3,7 @@ package com.tamer.alna99.watertabdriver.view.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -10,6 +11,7 @@ import android.widget.ProgressBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tamer.alna99.watertabdriver.R;
@@ -33,6 +35,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         loginViewModel = new LoginViewModel();
         initViews();
+        String shared = SharedPrefs.getUserEmail(this);
+        if (!shared.equals("-1")) {
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+        }
     }
 
     private void initViews() {
@@ -67,16 +74,18 @@ public class LoginActivity extends AppCompatActivity {
                 switch (result.status) {
                     case SUCCESS:
                         String data = (String) result.data;
-
                         JsonObject root = new JsonParser().parse(data).getAsJsonObject();
                         boolean success = root.get("loginSuccess").getAsBoolean();
                         if (success) {
+                            Log.d("dddd", data);
                             String id = root.get("id").getAsString();
                             String name = root.get("name").getAsString();
                             String email = root.get("email").getAsString();
                             String phone = root.get("phone").getAsString();
                             double rate = root.get("rate").getAsDouble();
+                            JsonArray jsonArray = root.get("orders").getAsJsonArray();
                             SharedPrefs.setUserInfo(getApplicationContext(), id, name, email, phone, rate);
+                            SharedPrefs.saveOrders(getApplicationContext(), jsonArray);
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         } else {
