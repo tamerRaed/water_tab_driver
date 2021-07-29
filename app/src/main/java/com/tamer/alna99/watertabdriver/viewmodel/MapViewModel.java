@@ -1,5 +1,7 @@
 package com.tamer.alna99.watertabdriver.viewmodel;
 
+import android.util.Log;
+
 import com.tamer.alna99.watertabdriver.model.DataWrapper;
 import com.tamer.alna99.watertabdriver.model.NetworkUtils;
 import com.tamer.alna99.watertabdriver.model.Result;
@@ -34,6 +36,7 @@ public class MapViewModel {
                     try {
                         assert response.body() != null;
                         dataWrapper.setData(Result.success(response.body().string()));
+                        Log.d("dddd", response.body().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

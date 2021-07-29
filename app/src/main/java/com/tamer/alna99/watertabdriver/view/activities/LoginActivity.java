@@ -71,6 +71,8 @@ public class LoginActivity extends AppCompatActivity {
         if (checkFields()) {
             loginViewModel.loginInfo().addObserver((observable, o) -> {
                 Result result = (Result) o;
+                String data1 = (String) result.data;
+                Log.d("dddd", data1);
                 switch (result.status) {
                     case SUCCESS:
                         String data = (String) result.data;
@@ -81,10 +83,10 @@ public class LoginActivity extends AppCompatActivity {
                             String id = root.get("id").getAsString();
                             String name = root.get("name").getAsString();
                             String email = root.get("email").getAsString();
-                            String phone = root.get("phone").getAsString();
+                            //String phone = root.get("phone").getAsString();
                             double rate = root.get("rate").getAsDouble();
                             JsonArray jsonArray = root.get("orders").getAsJsonArray();
-                            SharedPrefs.setUserInfo(getApplicationContext(), id, name, email, phone, rate);
+                            SharedPrefs.setUserInfo(getApplicationContext(), id, name, email, "", rate);
                             SharedPrefs.saveOrders(getApplicationContext(), jsonArray);
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();

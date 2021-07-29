@@ -26,7 +26,7 @@ public class SharedPrefs {
         editor.putString("name", name);
         editor.putString("email", email);
         editor.putString("phone", phone);
-        editor.putFloat("password", (float) rate);
+        editor.putFloat("rate", (float) rate);
         editor.apply();
     }
 
@@ -50,9 +50,9 @@ public class SharedPrefs {
         return sharedPreferences.getString("phone", "-1");
     }
 
-    public static String getUserPassword(Context context) {
+    public static float getUserRate(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
-        return sharedPreferences.getString("password", "-1");
+        return sharedPreferences.getFloat("rate", 0);
     }
 
     public static void saveOrders(Context context, JsonArray jsonArray) {

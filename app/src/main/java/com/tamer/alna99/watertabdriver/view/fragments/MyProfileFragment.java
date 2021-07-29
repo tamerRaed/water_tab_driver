@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import com.tamer.alna99.watertabdriver.R;
 import com.tamer.alna99.watertabdriver.model.SharedPrefs;
 
+import java.util.Objects;
+
 public class MyProfileFragment extends Fragment {
 
     @Override
@@ -22,11 +24,12 @@ public class MyProfileFragment extends Fragment {
         TextView email = view.findViewById(R.id.my_profile_email);
         TextView phone = view.findViewById(R.id.my_profile_phone);
 
-        if (SharedPrefs.getUserId(getContext()) != null) {
+        if (SharedPrefs.getUserId(Objects.requireNonNull(getContext())) != null) {
             name.setText(SharedPrefs.getUserName(getContext()));
-            phone.setText(SharedPrefs.getUserPhone(getContext()));
+//            phone.setText(SharedPrefs.getUserPhone(getContext()));
+            phone.setText("0592899024");
             email.setText(SharedPrefs.getUserEmail(getContext()));
-            rate.setText("0.0");
+            rate.setText(String.valueOf(SharedPrefs.getUserRate(getContext())));
         }
         return view;
     }

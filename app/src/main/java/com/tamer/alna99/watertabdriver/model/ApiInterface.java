@@ -8,7 +8,7 @@ import retrofit2.http.POST;
 
 public interface ApiInterface {
 
-    String LOGIN_PATH = "/api/users/logInDriver";
+    String LOGIN_PATH = "api/users/logInDriver";
     String UPDATE_LOCATION_PATH = "api/users/updateDriverLocation";
 
     String ID_PARAM = "driverID";

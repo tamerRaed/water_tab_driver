@@ -70,8 +70,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LatLng destination;
     private Marker marker;
     private Polyline polyline;
-    private JSONObject data;
-
     private ProgressBar progressBar;
     private Group group;
     private String id;
@@ -79,7 +77,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private Socket socket;
     private GoogleMap googleMap;
     private final Emitter.Listener newOrderListener = args -> {
-        Log.d("dddd", "" + args[0]);
         JSONObject data = (JSONObject) args[0];
 
         String clientName = null;
@@ -160,21 +157,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
             socket.emit("orderFinish", data3);
 
-            socket.disconnect();
-            socket = MySocket.getInstance();
-            socket.connect();
-            socket.emit("join", data);
-            socket.on("newOrder", newOrderListener);
-
             btnFinish.setVisibility(View.GONE);
         });
+
 
         supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         socket = MySocket.getInstance();
         socket.connect();
 
-        data = new JSONObject();
+        JSONObject data = new JSONObject();
         try {
             data.put("id", id);
             data.put("isDriver", "true");
@@ -198,9 +190,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
         this.googleMap = googleMap;
-//        latLng = new LatLng(31.520280, 34.444050);
+        latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(latLng);
@@ -296,11 +288,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 location = locationResult.getLastLocation();
+
                 supportMapFragment.getMapAsync(MapFragment.this);
                 progressBar.setVisibility(View.GONE);
                 group.setVisibility(View.VISIBLE);
                 double[] locations = {location.getLongitude(), location.getLatitude()};
-//                double[] locations = {34.444050, 31.520280};
+                Log.d("dddd", "Longitude: " + location.getLongitude());
+                Log.d("dddd", "Latitude: " + location.getLatitude());
+//                double[] locations = {34.4778, 31.4971};
 
                 mapViewModel.updateResult().addObserver((observable, o) -> {
                     Result result = (Result) o;
